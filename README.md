@@ -29,13 +29,13 @@ cargo build
 
 **Running the Project**
 
-Start your Solana test validator if you haven't already:
 ```bash
+# Start your Solana test validator if you haven't already:
 solana-test-validator
 ```
 
-Run the P2P network:
 ```bash
+# Run the P2P network:
 cargo run
 ```
 
