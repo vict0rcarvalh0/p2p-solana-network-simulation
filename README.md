@@ -17,8 +17,8 @@ This project implements a peer-to-peer (P2P) network using the libp2p library, a
 **Clone the repository:**
 
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/vict0rcarvalh0/p2p-solana-network-simulation.git
+cd p2p-solana-network-simulation/simulation
 ```
 
 **Build the project:**
