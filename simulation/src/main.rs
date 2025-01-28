@@ -41,7 +41,7 @@ struct TransactionMessage {
 // Structure to maintain the distributed table
 #[derive(Debug, Default)]
 struct DistributedTable {
-    peers: HashMap<String, Vec<String>>,         // PeerId -> List of transactions
+    peers: HashMap<String, Vec<String>>,          // PeerId -> List of transactions
     transactions: HashMap<String, String>,        // Transaction hash -> Transaction data
 }
 
