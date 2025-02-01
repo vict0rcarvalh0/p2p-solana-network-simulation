@@ -1,61 +1,100 @@
-# P2P Solana Network Simulation
-
-This project implements a peer-to-peer (P2P) network using the libp2p library, allowing nodes to send and receive transactions in a decentralized manner. The network consists of at least four nodes that subscribe to a "transaction" topic, enabling them to broadcast and receive dummy transactions. Additionally, the system maintains a distributed table that records peers and their associated transactions.
+# P2P Network Simulation
+This project implements a basic peer-to-peer (P2P) network using TCP sockets, allowing nodes to communicate and share transactions in a distributed manner. The network can support multiple nodes that can send and receive transactions, maintaining a distributed record of all transactions.
 
 ## Features
-- P2P Network: Build a network of at least four nodes.
-- Topic Subscription: Nodes subscribe to a common topic ("transaction") for transaction broadcasting.
-- Dummy Transactions: Create and send dummy transactions between nodes.
-- Distributed Table: Maintain a record of peers and their transactions.
+- TCP-based P2P Network: Build a network of multiple interconnected nodes
+- Transaction Broadcasting: Nodes can broadcast transactions to all connected peers
+- State Management: Each node maintains a record of transactions and connected peers
+- Simple Architecture: Uses basic TCP sockets for easy understanding and debugging
 
 ## Prerequisites
-
 - Rust programming language installed on your system. You can install it from rust-lang.org.
-- A running Solana RPC node (e.g., local Solana test validator).
 
 ## Installation
 **Clone the repository:**
-
 ```bash
 git clone https://github.com/vict0rcarvalh0/p2p-solana-network-simulation.git
-cd p2p-solana-network-simulation/simulation
+cd p2p-solana-network-simulation
 ```
 
 **Build the project:**
-
 ```bash
 cargo build
 ```
 
-**Running the Project**
+## Running the Project
 
+1. Start the first node (primary node):
 ```bash
-# Start your Solana test validator if you haven't already:
-solana-test-validator
+cargo run -- 8000
 ```
 
+2. Start additional nodes in different terminals, connecting to the primary node:
 ```bash
-# Run the P2P network:
-cargo run
+# Second node on port 8001
+cargo run -- 8001 127.0.0.1:8000
+
+# Third node on port 8002
+cargo run -- 8002 127.0.0.1:8000
+
+# Fourth node on port 8003
+cargo run -- 8003 127.0.0.1:8000
 ```
 
-This will create four nodes that connect to each other, subscribe to the "transaction" topic, and begin broadcasting dummy transactions.
+## Testing Transactions
+You can send transactions using netcat or telnet:
+```bash
+nc 127.0.0.1 8000
+```
+
+Then send a JSON transaction:
+```json
+{
+    "from": "node1",
+    "to": "node2",
+    "amount": 100.0,
+    "timestamp": 1234567890
+}
+```
 
 ## Code Overview
 The main components of the code are as follows:
 
-- Node Behavior: The NodeBehaviour struct defines how each node interacts with the network, utilizing Gossipsub for message passing and mDNS for peer discovery.
-- Transaction Message Structure: The TransactionMessage struct represents the structure of a transaction message, including the transaction data (encoded in Base64), sender's PeerId, and timestamp.
-- Distributed Table: The DistributedTable struct maintains two HashMaps:
-    - peers: Maps PeerIds to lists of transactions.
-    - transactions: Maps transaction hashes to transaction data.
-- Node Initialization: The Node struct initializes each node with a unique PeerId, transport configuration, Gossipsub instance, and a distributed table. It also handles event loops for processing incoming messages.
-- Transaction Broadcasting: The broadcast_transaction method creates a dummy Solana transaction and broadcasts it to all subscribed peers.
+- **Transaction Structure**: The `Transaction` struct represents a basic transaction with sender, receiver, amount, and timestamp.
+
+- **Node State**: The `NodeState` struct maintains:
+  - transactions: Maps sender addresses to lists of transactions
+  - peers: Keeps track of connected peer addresses
+
+- **Connection Handling**: 
+  - `handle_connection`: Processes incoming TCP connections and transaction broadcasts
+  - `connect_to_peer`: Establishes connections to other nodes in the network
+
+- **Network Communication**:
+  - Uses Tokio's TCP networking for async communication
+  - Implements a broadcast channel for transaction distribution
+  - Maintains persistent connections between peers
 
 ## How It Works
-- Node Creation: The application creates four nodes that join the P2P network.
-- Subscription: Each node subscribes to the "transaction" topic using Gossipsub.
-- Transaction Generation: The first node generates a dummy transaction using Solana's system instructions.
-- Broadcasting: The generated transaction is broadcasted across the network.
-- Receiving Transactions: Other nodes receive the transaction messages and update their distributed tables accordingly.
+1. **Node Startup**: Each node starts by listening on a specified TCP port
+2. **Peer Connection**: Nodes can connect to existing peers in the network
+3. **Transaction Broadcasting**: When a node receives a transaction:
+   - It stores the transaction in its local state
+   - Broadcasts the transaction to all connected peers
+   - Other nodes receive and store the transaction
 
+## Project Structure
+```
+src/
+  └── main.rs          # Main implementation file
+Cargo.toml             # Project dependencies and configuration
+README.md             # This file
+```
+
+## Dependencies
+- `tokio`: Async runtime and networking
+- `serde`: Serialization/deserialization of transactions
+- `serde_json`: JSON encoding/decoding
+
+## Contributing
+Feel free to submit issues and enhancement requests!
